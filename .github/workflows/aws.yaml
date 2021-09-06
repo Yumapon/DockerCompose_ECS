@@ -4,7 +4,7 @@ name: Deploy
 #masterブランチへのpush時にこのワークフローを実行するよう指定
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 #以下JOB
 jobs:
