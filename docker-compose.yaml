@@ -1,0 +1,12 @@
+version: "3.9"  # optional since v1.27.0
+services:
+
+#  frontend:
+#    image: keropon48/springtaskapp-front
+#    ports:
+#      - "443:8043"
+  backend:
+    container_name: "taskapp-back"
+    image: keropon48/springtaskapp:github
+    ports:
+      - "8080:8080"
