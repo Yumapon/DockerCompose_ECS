@@ -32,10 +32,10 @@ jobs:
 
     - name: Create context
       run: |
+        cat ~/.aws/credentials 
         docker context create ecs ecscontext --profile default
 
     - name: Deploy for ECS
       run: |
         docker context use ecscontext
         docker compose up
-        
