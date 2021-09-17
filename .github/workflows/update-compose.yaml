@@ -33,7 +33,7 @@ jobs:
           commit-message: |
             [${{ env.ENV }}] update container image
           committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+#          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: create-pull-request/release/${{ env.ENV }}
           base: master
           delete-branch: true
