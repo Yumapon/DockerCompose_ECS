@@ -1,0 +1,20 @@
+name: Update packages
+
+on:
+  repository_dispatch:
+    types: [update-pkgs]
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: ''
+        required: true
+        default: ''
+
+jobs:
+  update-pkgs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
