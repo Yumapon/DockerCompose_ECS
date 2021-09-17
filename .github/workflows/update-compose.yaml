@@ -12,15 +12,37 @@ on:
 
 jobs:
   update-pkgs:
+    env:
+      ENV: prod
+
     runs-on: ubuntu-latest
     
     steps:
       - name: checkout
         uses: actions/checkout@v2
 
-#      - name: update-docker-compose
-#        run: |
+      - name: chage docker image
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e '.services.backend.image = "keropon48/springtaskapp:github2"' -i docker-compose.yaml
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GIT_ACCESS_TOKEN }}
+          commit-message: |
+            [${{ env.ENV }}] update container image
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: create-pull-request/release/${{ env.ENV }}
+          base: master
+          delete-branch: true
+          title: |
+            [${{ env.ENV }}] Update Container Image
+          body: |
+            [${{ env.ENV }}] Update Container Image
+          labels: |
+            update container image
+            ${{ env.ENV }} release
+
           
