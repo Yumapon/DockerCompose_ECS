@@ -26,11 +26,17 @@ jobs:
 
       # dcoker imageの修正
       #参考：https://mikefarah.gitbook.io/yq/commands/evaluate
-      - name: chage docker image
+      - name: chage docker image(backend)
         uses: mikefarah/yq@master
-        if: ${{ github.event.client_payload.imagetag }} == 'backend'
+        if: ${{ github.event.client_payload.imagetag }} == 'back'
         with:
           cmd: yq e '.services.backend.image = "keropon48/springtaskapp:${{ env.RELEASE_VERSION }}"' -i docker-compose.yaml
+
+      - name: chage docker image(frontend)
+        uses: mikefarah/yq@master
+        if: ${{ github.event.client_payload.imagetag }} == 'front'
+        with:
+          cmd: yq e '.services.front.image = "keropon48/springtaskapp:${{ env.RELEASE_VERSION }}"' -i docker-compose.yaml
 
       # PRの発行
       #参考：https://github.com/peter-evans/create-pull-request
