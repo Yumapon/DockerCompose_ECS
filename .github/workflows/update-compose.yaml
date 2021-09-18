@@ -48,13 +48,13 @@ jobs:
       # 参考：
       - name: chage docker image(frontend) by semiauto
         uses: mikefarah/yq@master
-        if: ${{ github.event.inputs.part != null && github.event.client_payload.part == 'front' }}
+        if: ${{ github.event.inputs.part == 'front' }}
         with:
           cmd: yq e '.services.frontend.image = "keropon48/springtaskapp:${{ github.event.client_payload.imagetag }}"' -i docker-compose.yaml
 
       - name: chage docker image(backend) by semiauto
         uses: mikefarah/yq@master
-        if: ${{ github.event.inputs.part != null && github.event.client_payload.part == 'back' }}
+        if: ${{ github.event.inputs.part == 'back' }}
         with:
           cmd: yq e '.services.backend.image = "keropon48/springtaskapp:${{ github.event.client_payload.imagetag }}"' -i docker-compose.yaml
 
