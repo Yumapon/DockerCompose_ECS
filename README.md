@@ -107,3 +107,17 @@
     #削除
     docker compose down
     ```
+
+## RDS設定
+
+```sql
+CREATE TABLE IF NOT EXISTS TASK_LIST
+(
+    NUM VARCHAR(500) NOT NULL,
+    DEADLINE DATE,
+    NAME VARCHAR(200) NOT NULL,
+    CONTENT VARCHAR(2000),
+    CLIENT VARCHAR(100),
+    PRIMARY KEY (NUM)
+);
+```
