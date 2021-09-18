@@ -111,13 +111,10 @@
 ## RDS設定
 
 ```sql
-CREATE TABLE IF NOT EXISTS TASK_LIST
-(
-    NUM VARCHAR(500) NOT NULL,
-    DEADLINE DATE,
-    NAME VARCHAR(200) NOT NULL,
-    CONTENT VARCHAR(2000),
-    CLIENT VARCHAR(100),
-    PRIMARY KEY (NUM)
-);
+
 ```
+
+## 残課題
+
+ Dockerhubに格納した時点でDB接続情報を入れてしまっているため、
+ Docker compose up　の時点で入れ込むようにSpring側の改修が必要
