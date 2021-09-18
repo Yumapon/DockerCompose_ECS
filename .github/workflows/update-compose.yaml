@@ -21,27 +21,31 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 
+      # dcoker imageの修正
       #参考：https://mikefarah.gitbook.io/yq/commands/evaluate
       - name: chage docker image
         uses: mikefarah/yq@master
+        if: ${{ github.event.client_payload.imagetag }} == 'backend'
         with:
-          cmd: yq e '.services.backend.image = "keropon48/springtaskapp:github2"' -i docker-compose.yaml
+          cmd: IMAGE_TAG= echo ${{ github.event.client_payload.imagetag }} | awk -F'[/]' '{print $3}' yq e '.services.backend.image = "keropon48/springtaskapp:${IMAGE_TAG}"' -i docker-compose.yaml
 
+      # PRの発行
+      #参考：https://github.com/peter-evans/create-pull-request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GIT_ACCESS_TOKEN }}
           commit-message: |
             [${{ env.ENV }}] update container image
-          committer: GitHub <noreply@github.com>
+          committer: GitHub <noreply@github.com>  
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: create-pull-request/release/${{ env.ENV }}
           base: master
           delete-branch: true
           title: |
-            [${{ env.ENV }}] Update Container Image
+            [${{ env.ENV }}] Update Backend Container Image
           body: |
-            [${{ env.ENV }}] Update Container Image
+            [${{ env.ENV }}] Update Backend Container Image
           labels: |
             update container image
             ${{ env.ENV }} release
