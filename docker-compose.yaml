@@ -6,6 +6,6 @@ services:
   #      - "443:8043"
   backend:
     container_name: "taskapp-back"
-    image: keropon48/springtaskapp:github2
+    image: keropon48/springtaskapp:v1.0.44
     ports:
       - "8080:8080"
