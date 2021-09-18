@@ -7,7 +7,7 @@
     取得方法は[こちら](https://docs.github.com/ja/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)  
     ちなみに、与える権限はrepoだけで良さそうだけど未検証なので全権限与えといてください  
 
-## ECSへのデプロイ（仕掛中）
+## ECSへのデプロイ
 
 ### 事前準備（実施するのは最初の一回だけ。一回設定できたらそのあとは不要）
 
