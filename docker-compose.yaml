@@ -7,6 +7,6 @@ services:
   backend:
     container_name: "taskapp-back"
     x-aws-pull_credentials: arn:aws:secretsmanager:ap-northeast-1:030073904594:secret:dockerhubAccessToken-O31KAg
-    image: keropon48/springtaskapp:v1.1.16
+    image: keropon48/springtaskapp:v1.1.17
     ports:
       - "8080:8080"
