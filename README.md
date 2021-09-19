@@ -98,7 +98,7 @@
 * こっからが本当のDeploy
 
     ```sh
-    #AWS用のコンテキストに切り替え
+    #AWS用のコンテキストに切り替え(dcdeployは自分で作ったコンテキストの名前)
     docker context use dcdeploy
 
     #デプロイ
