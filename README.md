@@ -95,23 +95,113 @@
 
 ### Deploy本番
 
-* こっからが本当のDeploy
+* Deploy
+
+    docker-composeファイルでCDは不可。
+    最初の一回だけECSに展開可能。
+
+    やるのであれば以下コマンドで出力したCFnTemplateを使用して管理していくしかなさそう。
 
     ```sh
-    #AWS用のコンテキストに切り替え(dcdeployは自分で作ったコンテキストの名前)
-    docker context use dcdeploy
+    docker conpose convert >> convert.yaml
+    ```
 
-    #デプロイ
+* docker-composeで最初のECSへのデプロイ
+
+    ```sh
+    docker context use [上で作成したAWS用コンテキストを使用]
+
+    export SPRING_DATASOURCE_URL={作成したRDSのエンドポイント}
+    export SPRING_DATASOURCE_USERNAME={RDSのユーザネーム}
+    export SPRING_DATASOURCE_PASSWORD={RDSのパスワード}
+    export SPRING_DATASOURCE_DRIVERCLASSNAME={RDSで使用しているRDBMSのドライバー名}
+
     docker compose up
-
-    #削除
-    docker compose down
     ```
 
 ## RDS設定
 
-```sql
+Amazon RDSの画面から『データベースの作成』を押下
 
+データベースの設定画面で、下記の通り設定
+
+* データベース作成方法を選択
+    標準作成
+
+* エンジンのオプション
+
+    MySQL (Oracleを選択するとライセンス料等でかなり高額になる)
+
+* エディション
+
+    MySQL Community
+
+* バージョン
+    MySQL 8.0.23
+
+* テンプレート
+    無料利用枠
+
+* DBインスタンス識別子
+    taskappdatabase
+
+* マスターユーザー
+    admin
+
+* マスターパスワード
+    ******
+
+* DBインスタンスクラスとストレージ、可用性と耐久性はデフォルトのまま
+
+* 接続
+    パブリックアクセスの設定を『あり』にし、
+    VPCセキュリティグループは新規作成、名前は適当に決める
+    その他はデフォルトのまま
+
+* データベース認証
+    パスワード認証
+
+上記設定ができれば、データベースの作成を押下
+
+DB作成後、セキュリティグループのインバウンドが/32のアドレスになっているので
+ECSからの通信を許可するために全アケしちゃう
+
+データベースの一覧画面で、作成できたことが確認できたら『接続とセキュリティ』タブから
+エンドポイントとポートをメモ
+
+* DB作成クエリ
+
+```sql
+create database taskappdatabase;
+
+use taskappdatabase
+```
+
+* テーブル作成クエリ
+
+```sql
+CREATE TABLE TASK_LIST
+(
+    NUM VARCHAR(500) NOT NULL,
+    DEADLINE DATE,
+    NAME VARCHAR(200) NOT NULL,
+    CONTENT VARCHAR(2000),
+    CLIENT VARCHAR(100),
+    PRIMARY KEY (NUM)
+);
+
+CREATE TABLE USER_ID
+(
+    ID int NOT NULL,
+    PASSWORD VARCHAR(20),
+    PRIMARY KEY (ID)
+);
+```
+
+* データ作成のクエリ
+
+```sql
+INSERT INTO USER_ID (ID, PASSWORD) VALUES(100, 'password');
 ```
 
 ## 残課題
@@ -121,3 +211,5 @@
 
  backendはv.1.1.8がうまく動くことを確認できてる。
  （CIとかいじって動かなくなったらこれ使う）
+
+→ close

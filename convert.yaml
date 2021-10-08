@@ -1,0 +1,246 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  BackendService:
+    DependsOn:
+    - BackendTCP8080Listener
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+        - Cluster
+        - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+      - ContainerName: backend
+        ContainerPort: 8080
+        TargetGroupArn:
+          Ref: BackendTCP8080TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: DefaultNetwork
+          Subnets:
+          - subnet-92d47ab9
+          - subnet-d54b5a8e
+          - subnet-b7d275ff
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+      - RegistryArn:
+          Fn::GetAtt:
+          - BackendServiceDiscoveryEntry
+          - Arn
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+      - Key: com.docker.compose.service
+        Value: backend
+      TaskDefinition:
+        Ref: BackendTaskDefinition
+    Type: AWS::ECS::Service
+
+  BackendServiceDiscoveryEntry:
+    Properties:
+      Description: '"backend" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: backend
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+
+  BackendTCP8080Listener:
+    Properties:
+      DefaultActions:
+      - ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: BackendTCP8080TargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8080
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+
+  BackendTCP8080TargetGroup:
+    Properties:
+      Port: 8080
+      Protocol: TCP
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+      TargetType: ip
+      VpcId: vpc-fff8e298
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+
+  BackendTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Command:
+        - ap-northeast-1.compute.internal
+        - springtaskapp-infra.local
+        Essential: false
+        Image: docker/ecs-searchdomain-sidecar:1.0
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: springtaskapp-infra
+        Name: Backend_ResolvConf_InitContainer
+      - DependsOn:
+        - Condition: SUCCESS
+          ContainerName: Backend_ResolvConf_InitContainer
+        Environment:
+        - Name: SPRING_DATASOURCE_DRIVERCLASSNAME
+          Value: com.mysql.cj.jdbc.Driver
+        - Name: SPRING_DATASOURCE_PASSWORD
+          Value: password
+        - Name: SPRING_DATASOURCE_URL
+          Value: taskappdatabase2.cgan7fbbbc5s.ap-northeast-1.rds.amazonaws.com
+        - Name: SPRING_DATASOURCE_USERNAME
+          Value: admin
+        Essential: true
+        Image: docker.io/keropon48/springtaskapp:v1.2.2@sha256:50483ba8354499781b749c6292f114dca1ce8500a3a22a4de28d6697eebc5205
+        LinuxParameters: {}
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: springtaskapp-infra
+        Name: backend
+        PortMappings:
+        - ContainerPort: 8080
+          HostPort: 8080
+          Protocol: tcp
+        RepositoryCredentials:
+          CredentialsParameter: arn:aws:secretsmanager:ap-northeast-1:030073904594:secret:dockerhubAccessToken-O31KAg
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: BackendTaskExecutionRole
+      Family: springtaskapp-infra-backend
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+    Type: AWS::ECS::TaskDefinition
+
+  BackendTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - secretsmanager:GetSecretValue
+            - ssm:GetParameters
+            - kms:Decrypt
+            Condition: {}
+            Effect: Allow
+            Principal: {}
+            Resource:
+            - arn:aws:secretsmanager:ap-northeast-1:030073904594:secret:dockerhubAccessToken-O31KAg
+        PolicyName: backendGrantAccessToSecrets
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+      - Key: com.docker.compose.service
+        Value: backend
+    Type: AWS::IAM::Role
+
+  CloudMap:
+    Properties:
+      Description: Service Map for Docker Compose project springtaskapp-infra
+      Name: springtaskapp-infra.local
+      Vpc: vpc-fff8e298
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+
+  Cluster:
+    Properties:
+      ClusterName: springtaskapp-infra
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+    Type: AWS::ECS::Cluster
+
+  Default8080Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: backend:8080/tcp on default network
+      FromPort: 8080
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: TCP
+      ToPort: 8080
+    Type: AWS::EC2::SecurityGroupIngress
+
+  DefaultNetwork:
+    Properties:
+      GroupDescription: springtaskapp-infra Security Group for default network
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+      - Key: com.docker.compose.network
+        Value: springtaskapp-infra_default
+      VpcId: vpc-fff8e298
+    Type: AWS::EC2::SecurityGroup
+
+  DefaultNetworkIngress:
+    Properties:
+      Description: Allow communication within network default
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: DefaultNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+
+  LoadBalancer:
+    Properties:
+      LoadBalancerAttributes:
+      - Key: load_balancing.cross_zone.enabled
+        Value: "true"
+      Scheme: internet-facing
+      Subnets:
+      - subnet-92d47ab9
+      - subnet-d54b5a8e
+      - subnet-b7d275ff
+      Tags:
+      - Key: com.docker.compose.project
+        Value: springtaskapp-infra
+      Type: network
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    
+  LogGroup:
+    Properties:
+      LogGroupName: /docker-compose/springtaskapp-infra
+    Type: AWS::Logs::LogGroup

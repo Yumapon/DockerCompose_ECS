@@ -44,6 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    env:
+      SPRING_DATASOURCE_URL: ${{ secrets.URL }}
+      SPRING_DATASOURCE_USERNAME: ${{ secrets.USERNAME }}
+      SPRING_DATASOURCE_PASSWORD: ${{ secrets.PASSWORD }}
+      SPRING_DATASOURCE_DRIVERCLASSNAME:  ${{ secrets.DRIVER }}
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
