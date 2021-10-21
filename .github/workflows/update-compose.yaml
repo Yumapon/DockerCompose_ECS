@@ -72,9 +72,9 @@ jobs:
           base: master
           delete-branch: true
           title: |
-            [${{ env.ENV }}] Update Backend Container Image
+            [${{ env.ENV }}] Update Backend or Front Container Image
           body: |
-            [${{ env.ENV }}] Update Backend Container Image
+            [${{ env.ENV }}] Update Backend or Front Container Image
           labels: |
             update container image
             ${{ env.ENV }} release
