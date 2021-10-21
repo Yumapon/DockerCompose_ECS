@@ -36,7 +36,7 @@ jobs:
         uses: mikefarah/yq@master
         if: ${{ github.event.client_payload.part == 'front' }} 
         with:
-          cmd: yq e '.services.frontend.image = "keropon48/springtaskapp:${{ env.RELEASE_VERSION }}"' -i docker-compose.yaml
+          cmd: yq e '.services.frontend.image = "keropon48/springtaskappfront:${{ env.RELEASE_VERSION }}"' -i docker-compose.yaml
 
       - name: chage docker image(backend) by auto
         uses: mikefarah/yq@master
@@ -50,7 +50,7 @@ jobs:
         uses: mikefarah/yq@master
         if: ${{ github.event.inputs.part == 'front' }}
         with:
-          cmd: yq e '.services.frontend.image = "keropon48/springtaskapp:${{ github.event.inputs.imagetag }}"' -i docker-compose.yaml
+          cmd: yq e '.services.frontend.image = "keropon48/springtaskappfront:${{ github.event.inputs.imagetag }}"' -i docker-compose.yaml
 
       - name: chage docker image(backend) by semiauto
         uses: mikefarah/yq@master

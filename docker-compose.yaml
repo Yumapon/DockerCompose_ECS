@@ -1,9 +1,9 @@
 version: "3.9" # optional since v1.27.0
 services:
-  #  frontend:
-  #    image: keropon48/springtaskapp-front
-  #    ports:
-  #      - "443:8043"
+  frontend:
+    image: keropon48/springtaskapp-front:v1.0.0
+    ports:
+      - "3000:3000"
   backend:
     container_name: "taskapp-back"
     x-aws-pull_credentials: arn:aws:secretsmanager:ap-northeast-1:030073904594:secret:dockerhubAccessToken-O31KAg
