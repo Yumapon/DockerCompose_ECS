@@ -1,7 +1,7 @@
 version: "3.9" # optional since v1.27.0
 services:
   frontend:
-    image: keropon48/springtaskappfront:v2.0.3
+    image: keropon48/springtaskappfront:v2.0.4
     ports:
       - "80:80"
       - "3000:3000"
@@ -21,7 +21,6 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_DRIVERCLASSNAME: ${SPRING_DATASOURCE_DRIVERCLASSNAME}
-
 networks:
   # The presence of these objects is sufficient to define them
   front-tier: {}
