@@ -4,14 +4,24 @@ services:
     image: keropon48/springtaskappfront:v2.0.0
     ports:
       - "3000:3000"
+    networks:
+      - front-tier
+      - back-tier
   backend:
     container_name: "taskapp-back"
     x-aws-pull_credentials: arn:aws:secretsmanager:ap-northeast-1:030073904594:secret:dockerhubAccessToken-O31KAg
     image: keropon48/springtaskapp:v4.0.1
     ports:
       - "8080:8080"
+    networks:
+      - back-tier
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_DRIVERCLASSNAME: ${SPRING_DATASOURCE_DRIVERCLASSNAME}
+
+networks:
+  # The presence of these objects is sufficient to define them
+  front-tier: {}
+  back-tier: {}
