@@ -4,6 +4,7 @@ services:
     image: keropon48/springtaskappfront:v2.0.2
     ports:
       - "80:80"
+      - "3000:3000"
     networks:
       - front-tier
       - back-tier
